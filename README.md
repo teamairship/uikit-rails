@@ -1,4 +1,5 @@
 # UIKit for Sass
+[![Gem Version](https://badge.fury.io/rb/uikit-rails.svg)](https://badge.fury.io/rb/uikit-rails)
 
 ## Installation
 
