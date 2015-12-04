@@ -18,6 +18,7 @@ Import UIKit styles in `app/assets/stylesheets/application.scss`:
 
 ```scss
 @import "uikit";
+@import "uikit-components";
 ```
 
 Make sure the file has `.scss` extension (or `.sass` for Sass syntax). If you have just generated a new Rails app,
@@ -34,6 +35,7 @@ Require UIKit Javascripts in `app/assets/javascripts/application.js`:
 ```js
 //= require jquery
 //= require uikit
+//= require uikit-components
 ```
 
 ## Usage
