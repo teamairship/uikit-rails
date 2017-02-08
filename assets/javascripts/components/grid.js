@@ -1,15 +1,15 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(addon) {
 
     var component;
 
-    if (window.UIkit) {
-        component = addon(UIkit);
+    if (window.UIkit2) {
+        component = addon(UIkit2);
     }
 
-    if (typeof define == "function" && define.amd) {
-        define("uikit-grid", ["uikit"], function(){
-            return component || addon(UIkit);
+    if (typeof define == 'function' && define.amd) {
+        define('uikit-grid', ['uikit'], function(){
+            return component || addon(UIkit2);
         });
     }
 
@@ -25,7 +25,8 @@
             duration  : 300,
             gutter    : 0,
             controls  : false,
-            filter    : false
+            filter    : false,
+            origin    : UI.langdirection
         },
 
         boot:  function() {
@@ -37,7 +38,7 @@
 
                     var ele = UI.$(this);
 
-                    if(!ele.data("grid")) {
+                    if(!ele.data('grid')) {
                         UI.grid(ele, UI.Utils.options(ele.attr('data-uk-grid')));
                     }
                 });
@@ -55,6 +56,7 @@
             this.element.css({'position': 'relative'});
 
             this.controls = null;
+            this.origin   = this.options.origin;
 
             if (this.options.controls) {
 
@@ -63,7 +65,7 @@
                 // filter
                 this.controls.on('click', '[data-uk-filter]', function(e){
                     e.preventDefault();
-                    $this.filter(UI.$(this).data('ukFilter'));
+                    $this.filter(UI.$(this).attr('data-uk-filter'));
                 });
 
                 // sort
@@ -79,23 +81,23 @@
                 if ($this.currentfilter) {
                     $this.filter($this.currentfilter);
                 } else {
-                    this.updateLayout();
+                    this.update();
                 }
 
             }.bind(this), 100));
 
             this.on('display.uk.check', function(){
-                if ($this.element.is(":visible"))  $this.updateLayout();
+                if ($this.element.is(':visible'))  $this.update();
             });
 
-            UI.$html.on("changed.uk.dom", function(e) {
-                $this.updateLayout();
+            UI.domObserve(this.element, function(e) {
+                $this.update();
             });
 
             if (this.options.filter !== false) {
                 this.filter(this.options.filter);
             } else {
-                this.updateLayout();
+                this.update();
             }
         },
 
@@ -109,23 +111,25 @@
             }
 
             css = {
-                'position'   : 'absolute',
-                'box-sizing' : 'border-box',
-                'width'      : this.options.colwidth == 'auto' ? '' : this.options.colwidth
+                position  : 'absolute',
+                boxSizing : 'border-box',
+                width     : this.options.colwidth == 'auto' ? '' : this.options.colwidth
             };
 
             if (this.options.gutter) {
 
-                css['padding-left']   = this.gutterh;
+                css['padding-'+this.origin] = this.gutterh;
                 css['padding-bottom'] = this.gutterv;
 
-                this.element.css('margin-left', this.gutterh * -1);
+                this.element.css('margin-'+this.origin, this.gutterh * -1);
             }
 
             children.attr('data-grid-prepared', 'true').css(css);
         },
 
-        updateLayout: function(elements) {
+        update: function(elements) {
+
+            var $this = this;
 
             this._prepareElements();
 
@@ -137,7 +141,7 @@
                 top       = 0,
                 positions = [],
 
-                item, width, height, pos, i, z, max, size;
+                item, width, height, pos, posi, i, z, max, size;
 
             this.trigger('beforeupdate.uk.grid', [children]);
 
@@ -160,18 +164,21 @@
                     if (top <= pos.aY) { top = pos.aY; }
                 }
 
-                positions.push({
-                    "ele"    : item,
-                    "top"    : top,
-                    "left"   : left,
-                    "width"  : width,
-                    "height" : height,
-                    "aY"     : (top  + height),
-                    "aX"     : (left + width)
-                });
+                posi = {
+                    ele    : item,
+                    top    : top,
+                    width  : width,
+                    height : height,
+                    aY     : (top  + height),
+                    aX     : (left + width)
+                };
+
+                posi[$this.origin] = left;
+
+                positions.push(posi);
             });
 
-            var posPrev, maxHeight = 0;
+            var posPrev, maxHeight = 0, positionto;
 
             // fix top
             for (i=0,max=positions.length;i<max;i++) {
@@ -184,7 +191,7 @@
                     posPrev = positions[z];
 
                     // (posPrev.left + 1) fixex 1px bug when using % based widths
-                    if (pos.left < posPrev.aX && (posPrev.left +1) < pos.aX) {
+                    if (pos[this.origin] < posPrev.aX && (posPrev[this.origin] +1) < pos.aX) {
                         top = posPrev.aY;
                     }
                 }
@@ -202,7 +209,11 @@
                 this.element.stop().animate({'height': maxHeight}, 100);
 
                 positions.forEach(function(pos){
-                    pos.ele.stop().animate({"top": pos.top, "left": pos.left, opacity: 1}, this.options.duration);
+
+                    positionto = {"top": pos.top, opacity: 1};
+                    positionto[$this.origin] = pos[$this.origin];
+
+                    pos.ele.stop().animate(positionto, this.options.duration);
                 }.bind(this));
 
             } else {
@@ -210,7 +221,9 @@
                 this.element.css('height', maxHeight);
 
                 positions.forEach(function(pos){
-                    pos.ele.css({"top": pos.top, "left": pos.left, opacity: 1});
+                    positionto = {"top": pos.top, opacity: 1};
+                    positionto[$this.origin] = pos[$this.origin];
+                    pos.ele.css(positionto);
                 }.bind(this));
             }
 
@@ -261,7 +274,7 @@
             elements.hidden.attr('aria-hidden', 'true').filter(':visible').fadeOut(this.options.duration);
             elements.visible.attr('aria-hidden', 'false').filter(':hidden').css('opacity', 0).show();
 
-            $this.updateLayout(elements.visible);
+            $this.update(elements.visible);
 
             if (this.controls && this.controls.length) {
                 this.controls.find('[data-uk-filter]').removeClass('uk-active').filter('[data-uk-filter="'+filter+'"]').addClass('uk-active');
@@ -288,7 +301,7 @@
 
             }).appendTo(this.element);
 
-            this.updateLayout(elements.filter(':visible'));
+            this.update(elements.filter(':visible'));
 
             if (this.controls && this.controls.length) {
                 this.controls.find('[data-uk-sort]').removeClass('uk-active').filter('[data-uk-sort="'+by+':'+(order == -1 ? 'desc':'asc')+'"]').addClass('uk-active');
@@ -303,7 +316,7 @@
     * MIT license
     * https://github.com/desandro/get-size
     */
-    var _getSize = (function(){
+    function _getSize() {
 
         var prefixes = 'Webkit Moz ms Ms O'.split(' ');
         var docElemStyle = document.documentElement.style;
@@ -519,9 +532,9 @@
 
         return getSize;
 
-    })();
+    }
 
     function getElementSize(ele) {
-        return _getSize(ele);
+        return _getSize()(ele);
     }
 });

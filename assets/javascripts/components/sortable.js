@@ -1,4 +1,4 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 /*
   * Based on nativesortable - Copyright (c) Brian Grinstead - https://github.com/bgrins/nativesortable
   */
@@ -6,13 +6,13 @@
 
     var component;
 
-    if (window.UIkit) {
-        component = addon(UIkit);
+    if (window.UIkit2) {
+        component = addon(UIkit2);
     }
 
-    if (typeof define == "function" && define.amd) {
-        define("uikit-sortable", ["uikit"], function(){
-            return component || addon(UIkit);
+    if (typeof define == 'function' && define.amd) {
+        define('uikit-sortable', ['uikit'], function(){
+            return component || addon(UIkit2);
         });
     }
 
@@ -20,8 +20,12 @@
 
     "use strict";
 
-    var supportsTouch       = ('ontouchstart' in window) || (window.DocumentTouch && document instanceof DocumentTouch),
-        draggingPlaceholder, currentlyDraggingElement, currentlyDraggingTarget, dragging, moving, clickedlink, delayIdle, touchedlists, moved, overElement;
+    var supportsTouch       = ('ontouchstart' in window || 'MSGesture' in window) || (window.DocumentTouch && document instanceof DocumentTouch),
+        draggingPlaceholder, currentlyDraggingElement, currentlyDraggingTarget, dragging, moving, clickedlink, delayIdle, touchedlists, moved, overElement, startEvent;
+
+    var POINTER_DOWN = supportsTouch ? ('MSGesture' in window ? 'pointerdown':'touchstart') : 'mousedown',
+        POINTER_MOVE = supportsTouch ? ('MSGesture' in window ? 'pointermove':'touchmove') : 'mousemove',
+        POINTER_UP   = supportsTouch ? ('MSGesture' in window ? 'pointerup':'touchend') : 'mouseup';
 
     function closestSortable(ele) {
 
@@ -66,17 +70,17 @@
             // auto init
             UI.ready(function(context) {
 
-                UI.$("[data-uk-sortable]", context).each(function(){
+                UI.$('[data-uk-sortable]', context).each(function(){
 
                     var ele = UI.$(this);
 
-                    if(!ele.data("sortable")) {
-                        UI.sortable(ele, UI.Utils.options(ele.attr("data-uk-sortable")));
+                    if(!ele.data('sortable')) {
+                        UI.sortable(ele, UI.Utils.options(ele.attr('data-uk-sortable')));
                     }
                 });
             });
 
-            UI.$html.on('mousemove touchmove', function(e) {
+            UI.$html.on(POINTER_MOVE, function(e) {
 
                 if (delayIdle) {
 
@@ -100,10 +104,11 @@
                     }
 
                     var offset = draggingPlaceholder.data('mouse-offset'),
-                        left   = parseInt(e.originalEvent.pageX, 10) + offset.left,
-                        top    = parseInt(e.originalEvent.pageY, 10) + offset.top;
+                        ev     = e.originalEvent.touches && e.originalEvent.touches[0] || e.originalEvent,
+                        left   = parseInt(ev.pageX, 10) + offset.left,
+                        top    = parseInt(ev.pageY, 10) + offset.top;
 
-                    draggingPlaceholder.css({'left': left, 'top': top });
+                    draggingPlaceholder.css({left: left, top: top });
 
                     // adjust document scrolling
 
@@ -119,7 +124,7 @@
                 }
             });
 
-            UI.$html.on('mouseup touchend', function(e) {
+            UI.$html.on(POINTER_UP, function(e) {
 
                 delayIdle = clickedlink = false;
 
@@ -131,7 +136,7 @@
                 }
 
                 // inside or outside of sortable?
-                var sortable  = closestSortable(e.target),
+                var sortable  = closestSortable(currentlyDraggingElement),
                     component = draggingPlaceholder.$sortable,
                     ev        = { type: e.type };
 
@@ -166,14 +171,25 @@
                     return;
                 }
 
+                if ($this.options.handleClass) {
+                    var handle = $target.hasClass($this.options.handleClass) ? $target : $target.closest('.'+$this.options.handleClass, $this.element);
+                    if (!handle.length) return;
+                }
+
                 e.preventDefault();
 
-                if (!supportsTouch && $link.length) {
+                if ($link.length) {
 
                     $link.one('click', function(e){
                         e.preventDefault();
-                    }).one('mouseup', function(){
-                        if(!moved) $link.trigger('click');
+                    }).one(POINTER_UP, function(){
+
+                        if (!moved) {
+                            $link.trigger('click');
+                            if (supportsTouch && $link.attr('href').trim()) {
+                                location.href = $link.attr('href');
+                            }
+                        }
                     });
                 }
 
@@ -182,19 +198,6 @@
                 e.data.sortable = element;
 
                 return $this.dragStart(e, this);
-            });
-
-            var handleDragOver = delegate(function(e) {
-
-                if (!currentlyDraggingElement) {
-                    return true;
-                }
-
-                if (e.preventDefault) {
-                    e.preventDefault();
-                }
-
-                return false;
             });
 
             var handleDragEnter = delegate(UI.Utils.debounce(function(e) {
@@ -232,8 +235,9 @@
 
             // Bind/unbind standard mouse/touch events as a polyfill.
             function addDragHandlers() {
-                if (supportsTouch) {
-                    element.addEventListener("touchmove", handleTouchMove, false);
+
+                if (supportsTouch && startEvent.touches && startEvent.touches.length) {
+                    element.addEventListener(POINTER_MOVE, handleTouchMove, false);
                 } else {
                     element.addEventListener('mouseover', handleDragEnter, false);
                     element.addEventListener('mouseout', handleDragLeave, false);
@@ -243,8 +247,8 @@
             }
 
             function removeDragHandlers() {
-                if (supportsTouch) {
-                    element.removeEventListener("touchmove", handleTouchMove, false);
+                if (supportsTouch && startEvent.touches && startEvent.touches.length) {
+                    element.removeEventListener(POINTER_MOVE, handleTouchMove, false);
                 } else {
                     element.removeEventListener('mouseover', handleDragEnter, false);
                     element.removeEventListener('mouseout', handleDragLeave, false);
@@ -271,19 +275,21 @@
 
                     var touch, target, context;
 
+                    startEvent = e;
+
                     if (e) {
-                        touch  = (supportsTouch && e.touches && e.touches[0]) || { };
+                        touch  = e.touches && e.touches[0] || e;
                         target = touch.target || e.target;
 
                         // Fix event.target for a touch event
                         if (supportsTouch && document.elementFromPoint) {
-                            target = document.elementFromPoint(e.pageX - document.body.scrollLeft, e.pageY - document.body.scrollTop);
+                            target = document.elementFromPoint(touch.pageX - document.body.scrollLeft, touch.pageY - document.body.scrollTop);
                         }
 
                         overElement = UI.$(target);
                     }
 
-                    if (UI.$(target).hasClass($this.options.childClass)) {
+                    if (UI.$(target).hasClass('.'+$this.options.childClass)) {
                         fn.apply(target, [e]);
                     } else if (target !== element) {
 
@@ -297,8 +303,8 @@
                 };
             }
 
-            window.addEventListener(supportsTouch ? 'touchmove' : 'mousemove', handleDragMove, false);
-            element.addEventListener(supportsTouch ? 'touchstart': 'mousedown', handleDragStart, false);
+            window.addEventListener(POINTER_MOVE, handleDragMove, false);
+            element.addEventListener(POINTER_DOWN, handleDragStart, false);
         },
 
         dragStart: function(e, elem) {
@@ -314,17 +320,7 @@
                 return;
             }
 
-            if ($this.options.handleClass) {
-
-                var handle = target.hasClass($this.options.handleClass) ? target : target.closest('.'+$this.options.handleClass, $this.element);
-
-                if (!handle.length) {
-                    //e.preventDefault();
-                    return;
-                }
-            }
-
-            if (target.is('.'+$this.options.noDragClass) || target.closest('.'+$this.options._noDragClass).length) {
+            if (target.is('.'+$this.options.noDragClass) || target.closest('.'+$this.options.noDragClass).length) {
                 return;
             }
 
@@ -340,12 +336,12 @@
                 draggingPlaceholder.remove();
             }
 
-            var $current = UI.$(currentlyDraggingElement), offset = $current.offset();
+            var $current = UI.$(currentlyDraggingElement), offset = $current.offset(), ev = e.touches && e.touches[0] || e;
 
             delayIdle = {
 
-                pos       : { x:e.pageX, y:e.pageY },
-                threshold : $this.options.threshold,
+                pos       : { x:ev.pageX, y:ev.pageY },
+                threshold : $this.options.handleClass ? 1 : $this.options.threshold,
                 apply     : function(evt) {
 
                     draggingPlaceholder = UI.$('<div class="'+([$this.options.draggingClass, $this.options.dragCustomClass].join(' '))+'"></div>').css({
@@ -357,11 +353,11 @@
                         padding : $current.css('padding')
                     }).data({
                         'mouse-offset': {
-                            'left'   : offset.left - parseInt(evt.pageX, 10),
-                            'top'    : offset.top  - parseInt(evt.pageY, 10)
+                            left : offset.left - parseInt(ev.pageX, 10),
+                            top  : offset.top  - parseInt(ev.pageY, 10)
                         },
-                        'origin' : $this.element,
-                        'index'  : $current.index()
+                        origin : $this.element,
+                        index  : $current.index()
                     }).append($current.html()).appendTo('body');
 
                     draggingPlaceholder.$current  = $current;
@@ -376,7 +372,7 @@
                     $this.addDragHandlers();
 
                     $this.options.start(this, currentlyDraggingElement);
-                    $this.trigger('start.uk.sortable', [$this, currentlyDraggingElement]);
+                    $this.trigger('start.uk.sortable', [$this, currentlyDraggingElement, draggingPlaceholder]);
 
                     moved     = true;
                     delayIdle = false;
@@ -389,10 +385,10 @@
             overElement = UI.$(document.elementFromPoint(e.pageX - (document.body.scrollLeft || document.scrollLeft || 0), e.pageY - (document.body.scrollTop || document.documentElement.scrollTop || 0)));
 
             var overRoot     = overElement.closest('.'+this.options.baseClass),
-                groupOver    = overRoot.data("sortable-group"),
+                groupOver    = overRoot.data('sortable-group'),
                 $current     = UI.$(currentlyDraggingElement),
                 currentRoot  = $current.parent(),
-                groupCurrent = $current.data("sortable-group"),
+                groupCurrent = $current.data('sortable-group'),
                 overChild;
 
             if (overRoot[0] !== currentRoot[0] && groupCurrent !== undefined && groupOver === groupCurrent) {
@@ -416,7 +412,7 @@
                     overElement.append($current);
                 }
 
-                UIkit.$doc.trigger('mouseover');
+                UI.$doc.trigger('mouseover');
             }
 
             this.checkEmptyList();
@@ -437,12 +433,12 @@
             if (previousCounter === 0) {
 
                 var currentlist = UI.$(elem).parent(),
-                    startlist   = UI.$(currentlyDraggingElement).data("start-list");
+                    startlist   = UI.$(currentlyDraggingElement).data('start-list');
 
                 if (currentlist[0] !== startlist[0]) {
 
                     var groupOver    = currentlist.data('sortable-group'),
-                        groupCurrent = UI.$(currentlyDraggingElement).data("sortable-group");
+                        groupCurrent = UI.$(currentlyDraggingElement).data('sortable-group');
 
                     if ((groupOver ||  groupCurrent) && (groupOver != groupCurrent)) {
                         return false;
@@ -516,7 +512,7 @@
             if (!currentlyDraggingElement) return;
 
             var $current = UI.$(currentlyDraggingElement),
-                oldRoot  = draggingPlaceholder.data("origin"),
+                oldRoot  = draggingPlaceholder.data('origin'),
                 newRoot  = $current.closest('.'+this.options.baseClass),
                 triggers = [],
                 el       = UI.$(currentlyDraggingElement);
@@ -529,7 +525,9 @@
             }
 
             triggers.forEach(function (trigger, i) {
-                trigger.sortable.element.trigger('change.uk.sortable', [trigger.sortable, el, trigger.mode]);
+                if (trigger.sortable) {
+                    trigger.sortable.element.trigger('change.uk.sortable', [trigger.sortable, el, trigger.mode]);
+                }
             });
         },
 
@@ -583,7 +581,7 @@
             }).each(function() {
                 var ele    = UI.$(this),
                     before = ele.data('offset-before');
-                ele.css({'position':'absolute', 'top':before.top, 'left':before.left, 'min-width':before.width });
+                ele.css({position:'absolute', top:before.top, left:before.left, minWidth:before.width });
             });
 
             children.each(function(){
@@ -596,7 +594,7 @@
 
                     setTimeout(function(){
                         ele.animate({'top':offset.top, 'left':offset.left}, $this.options.animation, function() {
-                            ele.css({'position':'','top':'', 'left':'', 'min-width': '', 'pointer-events':''}).removeClass($this.options.overClass).removeData('child-dragenter');
+                            ele.css({position:'',top:'', left:'', minWidth: '', 'pointer-events':''}).removeClass($this.options.overClass).removeData('child-dragenter');
                             count--;
                             if (!count) {
                                 list.css('min-height', '');
@@ -613,10 +611,12 @@
 
             this.element.children().each(function(j, child) {
                 item = {};
-                for (var i = 0; i < child.attributes.length; i++) {
+                for (var i = 0, attr, val; i < child.attributes.length; i++) {
                     attribute = child.attributes[i];
                     if (attribute.name.indexOf('data-') === 0) {
-                        item[attribute.name.substr(5)] = UI.Utils.str2json(attribute.value);
+                        attr       = attribute.name.substr(5);
+                        val        =  UI.Utils.str2json(attribute.value);
+                        item[attr] = (val || attribute.value=='false' || attribute.value=='0') ? val:attribute.value;
                     }
                 }
                 data.push(item);

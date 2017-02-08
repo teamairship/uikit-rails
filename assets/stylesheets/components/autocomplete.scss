@@ -3,7 +3,7 @@
 //
 // Component:       `uk-autocomplete`
 //
-// Modifier:	    (Nav) `uk-nav-autocomplete`
+// Modifier:        (Nav) `uk-nav-autocomplete`
 //
 // States:          `uk-active`
 //
@@ -44,6 +44,11 @@ $nav-autocomplete-divider-border-width:          1px !default;
     vertical-align: middle;
 }
 
+/* Legacy dropdown modifier */
+.uk-dropdown-flip {
+    left: auto;
+    right: 0;
+}
 
 /* Nav modifier `uk-nav-autocomplete`
  ========================================================================== */

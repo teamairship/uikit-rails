@@ -1,15 +1,15 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(addon) {
 
     var component;
 
-    if (window.UIkit) {
-        component = addon(UIkit);
+    if (window.UIkit2) {
+        component = addon(UIkit2);
     }
 
-    if (typeof define == "function" && define.amd) { // AMD
-        define("uikit-lightbox", ["uikit"], function(){
-            return component || addon(UIkit);
+    if (typeof define == 'function' && define.amd) { // AMD
+        define('uikit-lightbox', ['uikit'], function(){
+            return component || addon(UIkit2);
         });
     }
 
@@ -22,9 +22,10 @@
     UI.component('lightbox', {
 
         defaults: {
-            "group"      : false,
-            "duration"   : 400,
-            "keyboard"   : true
+            allowfullscreen : true,
+            duration        : 400,
+            group           : false,
+            keyboard        : true
         },
 
         index : 0,
@@ -38,12 +39,12 @@
 
                 var link = UI.$(this);
 
-                if (!link.data("lightbox")) {
+                if (!link.data('lightbox')) {
 
-                    UI.lightbox(link, UI.Utils.options(link.attr("data-uk-lightbox")));
+                    UI.lightbox(link, UI.Utils.options(link.attr('data-uk-lightbox')));
                 }
 
-                link.data("lightbox").show(link);
+                link.data('lightbox').show(link);
             });
 
             // keyboard navigation
@@ -74,20 +75,17 @@
 
             if (this.element && this.element.length) {
 
-                var domSiblings  = this.options.group ? UI.$([
-                    '[data-uk-lightbox*="'+this.options.group+'"]',
-                    "[data-uk-lightbox*='"+this.options.group+"']"
-                ].join(',')) : this.element;
+                var domSiblings  = this.options.group ? UI.$('[data-uk-lightbox*="'+this.options.group+'"]') : this.element;
 
                 domSiblings.each(function() {
 
                     var ele = UI.$(this);
 
                     siblings.push({
-                        'source': ele.attr('href'),
-                        'title' : ele.attr('title'),
-                        'type'  : ele.attr("data-lightbox-type") || 'auto',
-                        'link'  : ele
+                        source : ele.attr('href'),
+                        title  : ele.attr('data-title') || ele.attr('title'),
+                        type   : ele.attr("data-lightbox-type") || 'auto',
+                        link   : ele
                     });
                 });
 
@@ -134,17 +132,17 @@
             item   = this.siblings[index];
 
             data = {
-                "lightbox" : $this,
-                "source"   : item.source,
-                "type"     : item.type,
-                "index"    : index,
-                "promise"  : promise,
-                "title"    : item.title,
-                "item"     : item,
-                "meta"     : {
-                    "content" : '',
-                    "width"   : null,
-                    "height"  : null
+                lightbox : $this,
+                source   : item.source,
+                type     : item.type,
+                index    : index,
+                promise  : promise,
+                title    : item.title,
+                item     : item,
+                meta     : {
+                    content : '',
+                    width   : null,
+                    height  : null
                 }
             };
 
@@ -199,14 +197,14 @@
 
             // calculate width
             var tmp = UI.$('<div>&nbsp;</div>').css({
-                'opacity'   : 0,
-                'position'  : 'absolute',
-                'top'       : 0,
-                'left'      : 0,
-                'width'     : '100%',
-                'max-width' : $this.modal.dialog.css('max-width'),
-                'padding'   : $this.modal.dialog.css('padding'),
-                'margin'    : $this.modal.dialog.css('margin')
+                opacity   : 0,
+                position  : 'absolute',
+                top       : 0,
+                left      : 0,
+                width     : '100%',
+                maxWidth  : $this.modal.dialog.css('max-width'),
+                padding   : $this.modal.dialog.css('padding'),
+                margin    : $this.modal.dialog.css('margin')
             }), maxwidth, maxheight, w = data.meta.width, h = data.meta.height;
 
             tmp.appendTo('body').width();
@@ -254,11 +252,11 @@
 
             this.modal.dialog.animate({width: w + pad, height: h + pad, top: t }, duration, 'swing', function() {
                 $this.modal.loader.addClass('uk-hidden');
-                $this.modal.content.css({width:''}).animate({'opacity': 1}, function() {
+                $this.modal.content.css({width:''}).animate({opacity: 1}, function() {
                     $this.modal.closer.removeClass('uk-hidden');
                 });
 
-                $this.modal.data({'mwidth': w, 'mheight': h});
+                $this.modal.data({mwidth: w, mheight: h});
             });
         },
 
@@ -278,16 +276,16 @@
 
         init: function(lightbox) {
 
-            lightbox.on("showitem.uk.lightbox", function(e, data){
+            lightbox.on('showitem.uk.lightbox', function(e, data){
 
                 if (data.type == 'image' || data.source && data.source.match(/\.(jpg|jpeg|png|gif|svg)$/i)) {
 
                     var resolve = function(source, width, height) {
 
                         data.meta = {
-                            "content" : '<img class="uk-responsive-width" width="'+width+'" height="'+height+'" src ="'+source+'">',
-                            "width"   : width,
-                            "height"  : height
+                            content : '<img class="uk-responsive-width" width="'+width+'" height="'+height+'" src ="'+source+'">',
+                            width   : width,
+                            height  : height
                         };
 
                         data.type = 'image';
@@ -318,7 +316,7 @@
         }
     });
 
-    UI.plugin("lightbox", "youtube", {
+    UI.plugin('lightbox', 'youtube', {
 
         init: function(lightbox) {
 
@@ -326,14 +324,14 @@
                 youtubeRegExpShort = /youtu\.be\/(.*)/;
 
 
-            lightbox.on("showitem.uk.lightbox", function(e, data){
+            lightbox.on('showitem.uk.lightbox', function(e, data){
 
                 var id, matches, resolve = function(id, width, height) {
 
                     data.meta = {
-                        'content': '<iframe src="//www.youtube.com/embed/'+id+'" width="'+width+'" height="'+height+'" style="max-width:100%;"></iframe>',
-                        'width': width,
-                        'height': height
+                        content: '<iframe src="//www.youtube.com/embed/'+id+'" width="'+width+'" height="'+height+'" style="max-width:100%;"'+(modal.lightbox.options.allowfullscreen?' allowfullscreen':'')+'></iframe>',
+                        width: width,
+                        height: height
                     };
 
                     data.type = 'iframe';
@@ -389,21 +387,21 @@
     });
 
 
-    UI.plugin("lightbox", "vimeo", {
+    UI.plugin('lightbox', 'vimeo', {
 
         init: function(lightbox) {
 
             var regex = /(\/\/.*?)vimeo\.[a-z]+\/([0-9]+).*?/, matches;
 
 
-            lightbox.on("showitem.uk.lightbox", function(e, data){
+            lightbox.on('showitem.uk.lightbox', function(e, data){
 
                 var id, resolve = function(id, width, height) {
 
                     data.meta = {
-                        'content': '<iframe src="//player.vimeo.com/video/'+id+'" width="'+width+'" height="'+height+'" style="width:100%;box-sizing:border-box;"></iframe>',
-                        'width': width,
-                        'height': height
+                        content: '<iframe src="//player.vimeo.com/video/'+id+'" width="'+width+'" height="'+height+'" style="width:100%;box-sizing:border-box;"'+(modal.lightbox.options.allowfullscreen?' allowfullscreen':'')+'></iframe>',
+                        width: width,
+                        height: height
                     };
 
                     data.type = 'iframe';
@@ -419,7 +417,7 @@
 
                         UI.$.ajax({
                             type     : 'GET',
-                            url      : 'http://vimeo.com/api/oembed.json?url=' + encodeURI(data.source),
+                            url      : '//vimeo.com/api/oembed.json?url=' + encodeURI(data.source),
                             jsonp    : 'callback',
                             dataType : 'jsonp',
                             success  : function(data) {
@@ -438,19 +436,19 @@
         }
     });
 
-    UI.plugin("lightbox", "video", {
+    UI.plugin('lightbox', 'video', {
 
         init: function(lightbox) {
 
-            lightbox.on("showitem.uk.lightbox", function(e, data){
+            lightbox.on('showitem.uk.lightbox', function(e, data){
 
 
                 var resolve = function(source, width, height) {
 
                     data.meta = {
-                        'content': '<video class="uk-responsive-width" src="'+source+'" width="'+width+'" height="'+height+'" controls></video>',
-                        'width': width,
-                        'height': height
+                        content: '<video class="uk-responsive-width" src="'+source+'" width="'+width+'" height="'+height+'" controls></video>',
+                        width: width,
+                        height: height
                     };
 
                     data.type = 'video';
@@ -484,6 +482,33 @@
     });
 
 
+    UI.plugin('lightbox', 'iframe', {
+
+        init: function (lightbox) {
+
+            lightbox.on('showitem.uk.lightbox', function (e, data) {
+
+                var resolve = function (source, width, height) {
+
+                    data.meta = {
+                        content: '<iframe class="uk-responsive-width" src="' + source + '" width="' + width + '" height="' + height + '"'+(modal.lightbox.options.allowfullscreen?' allowfullscreen':'')+'></iframe>',
+                        width: width,
+                        height: height
+                    };
+
+                    data.type = 'iframe';
+
+                    data.promise.resolve();
+                };
+
+                if (data.type === 'iframe' || data.source.match(/\.(html|php)$/)) {
+                    resolve(data.source, (lightbox.options.width || 800), (lightbox.options.height || 600));
+                }
+            });
+
+        }
+    });
+
     function getModal(lightbox) {
 
         if (modal) {
@@ -509,21 +534,29 @@
         modal.modal   = UI.modal(modal, {modal:false});
 
         // next / previous
-        modal.on("swipeRight swipeLeft", function(e) {
+        modal.on('swipeRight swipeLeft', function(e) {
             modal.lightbox[e.type=='swipeLeft' ? 'next':'previous']();
-        }).on("click", "[data-lightbox-previous], [data-lightbox-next]", function(e){
+        }).on('click', '[data-lightbox-previous], [data-lightbox-next]', function(e){
             e.preventDefault();
             modal.lightbox[UI.$(this).is('[data-lightbox-next]') ? 'next':'previous']();
         });
 
         // destroy content on modal hide
-        modal.on("hide.uk.modal", function(e) {
+        modal.on('hide.uk.modal', function(e) {
             modal.content.html('');
         });
 
+        var resizeCache = {w: window.innerWidth, h:window.innerHeight};
+
         UI.$win.on('load resize orientationchange', UI.Utils.debounce(function(e){
-            if (modal.is(':visible') && !UI.Utils.isFullscreen()) modal.lightbox.fitSize();
-        }.bind(this), 100));
+
+            if (resizeCache.w !== window.innerWidth && modal.is(':visible') && !UI.Utils.isFullscreen()) {
+                modal.lightbox.fitSize();
+            }
+
+            resizeCache = {w: window.innerWidth, h:window.innerHeight};
+
+        }, 100));
 
         modal.lightbox = lightbox;
 
@@ -539,10 +572,10 @@
         items.forEach(function(item) {
 
             group.push(UI.$.extend({
-                'source' : '',
-                'title'  : '',
-                'type'   : 'auto',
-                'link'   : false
+                source : '',
+                title  : '',
+                type   : 'auto',
+                link   : false
             }, (typeof(item) == 'string' ? {'source': item} : item)));
         });
 
