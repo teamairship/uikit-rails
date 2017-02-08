@@ -17,6 +17,9 @@ gem 'sass-rails', '>= 3.2'
 Import UIKit styles in `app/assets/stylesheets/application.scss`:
 
 ```scss
+@import "uikit-mixins";
+// <--- add here file with your mixins
+@import "uikit-variables";
 @import "uikit";
 @import "uikit-components";
 ```
