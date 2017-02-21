@@ -49,7 +49,7 @@ Import UIKit into a Sass file (for example, application.scss) to get all of UIKi
 @import "uikit";
 ```
 
-The full list of uikit variables can be found [here](https://github.com/thinkairship/uikit-rails/wiki/Variables). You can override these by simply redefining the variable before the `@import` directive, e.g.:
+The full list of uikit variables can be found [here](https://github.com/teamairship/uikit-rails/wiki/Variables). You can override these by simply redefining the variable before the `@import` directive, e.g.:
 
 ```scss
 $button-primary-color: #FF4200;
@@ -61,7 +61,7 @@ $nav-navbar-color: $light-orange;
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/thinkairship/uikit-rails.
+Bug reports and pull requests are welcome on GitHub at https://github.com/teamairship/uikit-rails.
 
 ## License
 
