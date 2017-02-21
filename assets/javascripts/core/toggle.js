@@ -1,4 +1,4 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(UI){
 
     "use strict";
@@ -19,11 +19,11 @@
             // init code
             UI.ready(function(context) {
 
-                UI.$("[data-uk-toggle]", context).each(function() {
+                UI.$('[data-uk-toggle]', context).each(function() {
                     var ele = UI.$(this);
 
-                    if (!ele.data("toggle")) {
-                        var obj = UI.toggle(ele, UI.Utils.options(ele.attr("data-uk-toggle")));
+                    if (!ele.data('toggle')) {
+                        var obj = UI.toggle(ele, UI.Utils.options(ele.attr('data-uk-toggle')));
                     }
                 });
 
@@ -43,10 +43,12 @@
 
             this.aria = (this.options.cls.indexOf('uk-hidden') !== -1);
 
-            this.getToggles();
+            this.on('click', function(e) {
 
-            this.on("click", function(e) {
-                if ($this.element.is('a[href="#"]')) e.preventDefault();
+                if ($this.element.is('a[href="#"]')) {
+                    e.preventDefault();
+                }
+
                 $this.toggle();
             });
 
@@ -54,6 +56,8 @@
         },
 
         toggle: function() {
+
+            this.getToggles();
 
             if(!this.totoggle.length) return;
 
@@ -110,11 +114,11 @@
 
         updateAria: function() {
             if (this.aria && this.totoggle.length) {
-                this.totoggle.each(function(){
+                this.totoggle.not('[aria-hidden]').each(function(){
                     UI.$(this).attr('aria-hidden', UI.$(this).hasClass('uk-hidden'));
                 });
             }
         }
     });
 
-})(UIkit);
+})(UIkit2);

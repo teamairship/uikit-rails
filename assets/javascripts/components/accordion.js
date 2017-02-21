@@ -1,14 +1,14 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(addon) {
     var component;
 
-    if (window.UIkit) {
-        component = addon(UIkit);
+    if (window.UIkit2) {
+        component = addon(UIkit2);
     }
 
-    if (typeof define == "function" && define.amd) {
-        define("uikit-accordion", ["uikit"], function(){
-            return component || addon(UIkit);
+    if (typeof define == 'function' && define.amd) {
+        define('uikit-accordion', ['uikit'], function(){
+            return component || addon(UIkit2);
         });
     }
 })(function(UI){
@@ -35,11 +35,11 @@
 
                 setTimeout(function(){
 
-                    UI.$("[data-uk-accordion]", context).each(function(){
+                    UI.$('[data-uk-accordion]', context).each(function(){
 
                         var ele = UI.$(this);
 
-                        if(!ele.data("accordion")) {
+                        if (!ele.data('accordion')) {
                             UI.accordion(ele, UI.Utils.options(ele.attr('data-uk-accordion')));
                         }
                     });
@@ -52,18 +52,20 @@
 
             var $this = this;
 
-            this.element.on('click.uikit.accordion', this.options.toggle, function(e) {
+            this.element.on('click.uk.accordion', this.options.toggle, function(e) {
 
                 e.preventDefault();
 
                 $this.toggleItem(UI.$(this).data('wrapper'), $this.options.animate, $this.options.collapse);
             });
 
-            this.update();
+            this.update(true);
 
-            if (this.options.showfirst) {
-                this.toggleItem(this.toggle.eq(0).data('wrapper'), false, false);
-            }
+            UI.domObserve(this.element, function(e) {
+                if ($this.element.children($this.options.containers).length) {
+                    $this.update();
+                }
+            });
         },
 
         toggleItem: function(wrapper, animated, collapse) {
@@ -113,7 +115,7 @@
             this.element.trigger('toggle.uk.accordion', [active, wrapper.data('toggle'), wrapper.data('content')]);
         },
 
-        update: function() {
+        update: function(init) {
 
             var $this = this, $content, $wrapper, $toggle;
 
@@ -142,6 +144,10 @@
             });
 
             this.element.trigger('update.uk.accordion', [this]);
+
+            if (init && this.options.showfirst) {
+                this.toggleItem(this.toggle.eq(0).data('wrapper'), false, false);
+            }
         }
 
     });
@@ -157,9 +163,9 @@
         } else {
 
             var tmp = {
-                position   : $ele.css("position"),
-                visibility : $ele.css("visibility"),
-                display    : $ele.css("display")
+                position   : $ele.css('position'),
+                visibility : $ele.css('visibility'),
+                display    : $ele.css('display')
             };
 
             height = $ele.css({position: 'absolute', visibility: 'hidden', display: 'block'}).outerHeight();

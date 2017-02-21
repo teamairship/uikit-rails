@@ -1,4 +1,4 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 /*
  * Based on simplePagination - Copyright (c) 2012 Flavius Matis - http://flaviusmatis.github.com/simplePagination.js/ (MIT)
  */
@@ -6,13 +6,13 @@
 
     var component;
 
-    if (window.UIkit) {
-        component = addon(UIkit);
+    if (window.UIkit2) {
+        component = addon(UIkit2);
     }
 
-    if (typeof define == "function" && define.amd) {
-        define("uikit-pagination", ["uikit"], function(){
-            return component || addon(UIkit);
+    if (typeof define == 'function' && define.amd) {
+        define('uikit-pagination', ['uikit'], function(){
+            return component || addon(UIkit2);
         });
     }
 
@@ -39,11 +39,11 @@
             // init code
             UI.ready(function(context) {
 
-                UI.$("[data-uk-pagination]", context).each(function(){
+                UI.$('[data-uk-pagination]', context).each(function(){
                     var ele = UI.$(this);
 
-                    if (!ele.data("pagination")) {
-                        UI.pagination(ele, UI.Utils.options(ele.attr("data-uk-pagination")));
+                    if (!ele.data('pagination')) {
+                        UI.pagination(ele, UI.Utils.options(ele.attr('data-uk-pagination')));
                     }
                 });
             });
@@ -57,9 +57,9 @@
             this.currentPage   = this.options.currentPage;
             this.halfDisplayed = this.options.displayedPages / 2;
 
-            this.on("click", "a[data-page]", function(e){
+            this.on('click', 'a[data-page]', function(e){
                 e.preventDefault();
-                $this.selectPage(UI.$(this).data("page"));
+                $this.selectPage(UI.$(this).data('page'));
             });
 
             this._render();
@@ -93,7 +93,7 @@
             this.element.empty();
 
             // Generate Prev link
-            if (o.lblPrev) this._append(o.currentPage - 1, {text: o.lblPrev});
+            if (o.lblPrev) this._append(this.currentPage - 1, {text: o.lblPrev});
 
             // Generate start edges
             if (interval.start > 0 && o.edges > 0) {
@@ -127,7 +127,7 @@
             }
 
             // Generate Next link (unless option is set for at front)
-            if (o.lblNext) this._append(o.currentPage + 1, {text: o.lblNext});
+            if (o.lblNext) this._append(this.currentPage + 1, {text: o.lblNext});
         },
 
         _append: function(pageIndex, opts) {

@@ -1,15 +1,15 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(addon) {
 
     var component;
 
-    if (window.UIkit) {
-        component = addon(UIkit);
+    if (window.UIkit2) {
+        component = addon(UIkit2);
     }
 
-    if (typeof define == "function" && define.amd) {
-        define("uikit-slider", ["uikit"], function(){
-            return component || addon(UIkit);
+    if (typeof define == 'function' && define.amd) {
+        define('uikit-slider', ['uikit'], function(){
+            return component || addon(UIkit2);
         });
     }
 
@@ -59,10 +59,10 @@
             this.focus     = 0;
 
             UI.$win.on('resize load', UI.Utils.debounce(function() {
-                $this.resize(true);
+                $this.update(true);
             }, 100));
 
-            this.on('click.uikit.slider', '[data-uk-slider-item]', function(e) {
+            this.on('click.uk.slider', '[data-uk-slider-item]', function(e) {
 
                 e.preventDefault();
 
@@ -143,11 +143,11 @@
                 mouseleave: function() { $this.hovering = false; }
             });
 
-            this.resize(true);
+            this.update(true);
 
             this.on('display.uk.check', function(){
                 if ($this.element.is(":visible")) {
-                    $this.resize(true);
+                    $this.update(true);
                 }
             });
 
@@ -159,9 +159,15 @@
                 this.start();
             }
 
+            UI.domObserve(this.element, function(e) {
+                if ($this.element.children(':not([data-slider-slide])').length) {
+                    $this.update(true);
+                }
+            });
+
         },
 
-        resize: function(focus) {
+        update: function(focus) {
 
             var $this = this, pos = 0, maxheight = 0, item, width, cwidth, size;
 
@@ -172,7 +178,7 @@
 
             this.items.each(function(idx){
 
-                item      = UI.$(this);
+                item      = UI.$(this).attr('data-slider-slide', idx);
                 size      = item.css({'left': '', 'width':''})[0].getBoundingClientRect();
                 width     = size.width;
                 cwidth    = item.width();
@@ -185,7 +191,7 @@
 
             this.container.css({'min-width': pos, 'min-height': maxheight});
 
-            if (this.options.infinite && pos <= (2*this.vp) && !this.itemsResized) {
+            if (this.options.infinite && (pos <= (2*this.vp) || this.items.length < 5) && !this.itemsResized) {
 
                 // fill with cloned items
                 this.container.children().each(function(idx){
@@ -196,7 +202,7 @@
 
                 this.itemsResized = true;
 
-                return this.resize();
+                return this.update();
             }
 
             this.cw     = pos;
@@ -292,6 +298,15 @@
                 }
             }
 
+            // mark elements
+            var left = this.items.eq(idx).data('left');
+
+            this.items.removeClass('uk-slide-before uk-slide-after').each(function(i){
+                if (i!==idx) {
+                    UI.$(this).addClass(UI.$(this).data('left') < left ? 'uk-slide-before':'uk-slide-after');
+                }
+            });
+
             this.focus = idx;
 
             this.trigger('focusitem.uk.slider', [idx,this.items.eq(idx),this]);
@@ -355,9 +370,9 @@
                         var left = item.data('area');
 
                         itm.css({'left': left}).data({
-                            'left'  : left,
-                            'area'  : (left+itm.data('width')),
-                            'center': (left - ($this.vp/2 - itm.data('cwidth')/2))
+                            left  : left,
+                            area  : (left+itm.data('width')),
+                            center: (left - ($this.vp/2 - itm.data('cwidth')/2))
                         });
 
                         item = itm;
@@ -389,9 +404,9 @@
                         var left = item.data('left') - itm.data('width');
 
                         itm.css({'left': left}).data({
-                            'left'  : left,
-                            'area'  : (left+itm.data('width')),
-                            'center': (left - ($this.vp/2 - itm.data('cwidth')/2))
+                            left  : left,
+                            area  : (left+itm.data('width')),
+                            center: (left - ($this.vp/2 - itm.data('cwidth')/2))
                         });
 
                         item = itm;
@@ -402,7 +417,7 @@
     });
 
     // handle dragging
-    UI.$doc.on('mousemove.uikit.slider touchmove.uikit.slider', function(e) {
+    UI.$doc.on('mousemove.uk.slider touchmove.uk.slider', function(e) {
 
         if (e.originalEvent && e.originalEvent.touches) {
             e = e.originalEvent.touches[0];
@@ -480,7 +495,7 @@
         store.diff    = diff;
     });
 
-    UI.$doc.on('mouseup.uikit.slider touchend.uikit.slider', function(e) {
+    UI.$doc.on('mouseup.uk.slider touchend.uk.slider', function(e) {
 
         if (dragging) {
 
@@ -504,6 +519,9 @@
 
                     z = z+1 == dragging.items.length ? 0:z+1;
                 }
+                if (!dragging.options.infinite && !focus) {
+                    focus = dragging.items.length;
+                }
 
             } else {
 
@@ -517,6 +535,9 @@
                     }
 
                     z = z-1 == -1 ? dragging.items.length-1:z-1;
+                }
+                if (!dragging.options.infinite && !focus) {
+                    focus = 0
                 }
             }
 

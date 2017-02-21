@@ -1,9 +1,15 @@
-/*! UIkit 2.24.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.27.2 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(UI) {
 
     "use strict";
 
     var active = false, activeCount = 0, $html = UI.$html, body;
+
+    UI.$win.on('resize orientationchange', UI.Utils.debounce(function(){
+        UI.$('.uk-modal.uk-open').each(function(){
+            return UI.$(this).data('modal') && UI.$(this).data('modal').resize();
+        });
+    }, 150));
 
     UI.component('modal', {
 
@@ -27,18 +33,18 @@
 
             var $this = this;
 
-            this.paddingdir = "padding-" + (UI.langdirection == 'left' ? "right":"left");
-            this.dialog     = this.find(".uk-modal-dialog");
+            this.paddingdir = 'padding-' + (UI.langdirection == 'left' ? 'right':'left');
+            this.dialog     = this.find('.uk-modal-dialog');
 
             this.active     = false;
 
             // Update ARIA
-            this.element.attr('aria-hidden', this.element.hasClass("uk-open"));
+            this.element.attr('aria-hidden', this.element.hasClass('uk-open'));
 
-            this.on("click", ".uk-modal-close", function(e) {
+            this.on('click', '.uk-modal-close', function(e) {
                 e.preventDefault();
                 $this.hide();
-            }).on("click", function(e) {
+            }).on('click', function(e) {
 
                 var target = UI.$(e.target);
 
@@ -46,10 +52,12 @@
                     $this.hide();
                 }
             });
+
+            UI.domObserve(this.element, function(e) { $this.resize(); });
         },
 
         toggle: function() {
-            return this[this.isActive() ? "hide" : "show"]();
+            return this[this.isActive() ? 'hide' : 'show']();
         },
 
         show: function() {
@@ -64,8 +72,8 @@
                 active.hide(true);
             }
 
-            this.element.removeClass("uk-open").show();
-            this.resize();
+            this.element.removeClass('uk-open').show();
+            this.resize(true);
 
             if (this.options.modal) {
                 active = this;
@@ -79,17 +87,19 @@
                 this.hasTransitioned = false;
                 this.element.one(UI.support.transition.end, function(){
                     $this.hasTransitioned = true;
-                }).addClass("uk-open");
+                    UI.Utils.focus($this.dialog, 'a[href]');
+                }).addClass('uk-open');
             } else {
-                this.element.addClass("uk-open");
+                this.element.addClass('uk-open');
+                UI.Utils.focus(this.dialog, 'a[href]');
             }
 
-            $html.addClass("uk-modal-page").height(); // force browser engine redraw
+            $html.addClass('uk-modal-page').height(); // force browser engine redraw
 
             // Update ARIA
             this.element.attr('aria-hidden', 'false');
 
-            this.element.trigger("show.uk.modal");
+            this.element.trigger('show.uk.modal');
 
             UI.Utils.checkDisplay(this.dialog, true);
 
@@ -104,7 +114,7 @@
 
                 this.one(UI.support.transition.end, function() {
                     $this._hide();
-                }).removeClass("uk-open");
+                }).removeClass('uk-open');
 
             } else {
 
@@ -114,7 +124,9 @@
             return this;
         },
 
-        resize: function() {
+        resize: function(force) {
+
+            if (!this.isActive() && !force) return;
 
             var bodywidth  = body.width();
 
@@ -130,9 +142,9 @@
                 pad = parseInt(this.dialog.css('margin-top'), 10) + parseInt(this.dialog.css('margin-bottom'), 10);
 
                 if ((dh + pad) < window.innerHeight) {
-                    this.dialog.css({'top': (window.innerHeight/2 - dh/2) - pad });
+                    this.dialog.css({top: (window.innerHeight/2 - dh/2) - pad });
                 } else {
-                    this.dialog.css({'top': ''});
+                    this.dialog.css({top: ''});
                 }
             }
         },
@@ -152,8 +164,8 @@
                 h      = wh - 2*(offset < 20 ? 20:offset) - dh;
 
                 scrollable.css({
-                    'max-height': (h < this.options.minScrollHeight ? '':h),
-                    'height':''
+                    maxHeight: (h < this.options.minScrollHeight ? '':h),
+                    height:''
                 });
 
                 return true;
@@ -178,13 +190,13 @@
                 body.css(this.paddingdir, "");
             }
 
-            if(active===this) active = false;
+            if (active===this) active = false;
 
             this.trigger('hide.uk.modal');
         },
 
         isActive: function() {
-            return this.active;
+            return this.element.hasClass('uk-open');
         }
 
     });
@@ -194,16 +206,16 @@
         boot: function() {
 
             // init code
-            UI.$html.on("click.modal.uikit", "[data-uk-modal]", function(e) {
+            UI.$html.on('click.modal.uikit', '[data-uk-modal]', function(e) {
 
                 var ele = UI.$(this);
 
-                if (ele.is("a")) {
+                if (ele.is('a')) {
                     e.preventDefault();
                 }
 
-                if (!ele.data("modalTrigger")) {
-                    var modal = UI.modalTrigger(ele, UI.Utils.options(ele.attr("data-uk-modal")));
+                if (!ele.data('modalTrigger')) {
+                    var modal = UI.modalTrigger(ele, UI.Utils.options(ele.attr('data-uk-modal')));
                     modal.show();
                 }
 
@@ -217,10 +229,6 @@
                     active.hide();
                 }
             });
-
-            UI.$win.on("resize orientationchange", UI.Utils.debounce(function(){
-                if (active) active.resize();
-            }, 150));
         },
 
         init: function() {
@@ -228,7 +236,7 @@
             var $this = this;
 
             this.options = UI.$.extend({
-                "target": $this.element.is("a") ? $this.element.attr("href") : false
+                target: $this.element.is('a') ? $this.element.attr('href') : false
             }, this.options);
 
             this.modal = UI.modal(this.options.target, this.options);
@@ -239,17 +247,17 @@
             });
 
             //methods
-            this.proxy(this.modal, "show hide isActive");
+            this.proxy(this.modal, 'show hide isActive');
         }
     });
 
     UI.modal.dialog = function(content, options) {
 
-        var modal = UI.modal(UI.$(UI.modal.dialog.template).appendTo("body"), options);
+        var modal = UI.modal(UI.$(UI.modal.dialog.template).appendTo('body'), options);
 
-        modal.on("hide.uk.modal", function(){
+        modal.on('hide.uk.modal', function(){
             if (modal.persist) {
-                modal.persist.appendTo(modal.persist.data("modalPersistParent"));
+                modal.persist.appendTo(modal.persist.data('modalPersistParent'));
                 modal.persist = false;
             }
             modal.element.remove();
@@ -280,18 +288,21 @@
         return modal.show();
     };
 
-    UI.modal.confirm = function(content, onconfirm, options) {
+    UI.modal.confirm = function(content, onconfirm, oncancel) {
+
+        var options = arguments.length > 1 && arguments[arguments.length-1] ? arguments[arguments.length-1] : {};
 
         onconfirm = UI.$.isFunction(onconfirm) ? onconfirm : function(){};
-        options   = UI.$.extend(true, {bgclose:false, keyboard:false, modal:false, labels:UI.modal.labels}, options);
+        oncancel  = UI.$.isFunction(oncancel) ? oncancel : function(){};
+        options   = UI.$.extend(true, {bgclose:false, keyboard:false, modal:false, labels:UI.modal.labels}, UI.$.isFunction(options) ? {}:options);
 
         var modal = UI.modal.dialog(([
             '<div class="uk-margin uk-modal-content">'+String(content)+'</div>',
-            '<div class="uk-modal-footer uk-text-right"><button class="uk-button uk-modal-close">'+options.labels.Cancel+'</button> <button class="uk-button uk-button-primary js-modal-confirm">'+options.labels.Ok+'</button></div>'
+            '<div class="uk-modal-footer uk-text-right"><button class="uk-button js-modal-confirm-cancel">'+options.labels.Cancel+'</button> <button class="uk-button uk-button-primary js-modal-confirm">'+options.labels.Ok+'</button></div>'
         ]).join(""), options);
 
-        modal.element.find(".js-modal-confirm").on("click", function(){
-            onconfirm();
+        modal.element.find(".js-modal-confirm, .js-modal-confirm-cancel").on("click", function(){
+            UI.$(this).is('.js-modal-confirm') ? onconfirm() : oncancel();
             modal.hide();
         });
 
@@ -317,20 +328,14 @@
 
         input = modal.element.find("input[type='text']").val(value || '').on('keyup', function(e){
             if (e.keyCode == 13) {
-                modal.element.find(".js-modal-ok").trigger('click');
+                modal.element.find('.js-modal-ok').trigger('click');
             }
         });
 
-        modal.element.find(".js-modal-ok").on("click", function(){
+        modal.element.find('.js-modal-ok').on('click', function(){
             if (onsubmit(input.val())!==false){
                 modal.hide();
             }
-        });
-
-        modal.on('show.uk.modal', function(){
-            setTimeout(function(){
-                input.focus();
-            }, 50);
         });
 
         return modal.show();
@@ -347,12 +352,10 @@
         return modal.show();
     };
 
-
     UI.modal.labels = {
-        'Ok': 'Ok',
-        'Cancel': 'Cancel'
+        Ok: 'Ok',
+        Cancel: 'Cancel'
     };
-
 
     // helper functions
     function setContent(content, modal){
@@ -366,14 +369,14 @@
 
             if(content.parent().length) {
                 modal.persist = content;
-                modal.persist.data("modalPersistParent", content.parent());
+                modal.persist.data('modalPersistParent', content.parent());
             }
         }else if (typeof content === 'string' || typeof content === 'number') {
                 // just insert the data as innerHTML
                 content = UI.$('<div></div>').html(content);
         }else {
                 // unsupported data type!
-                content = UI.$('<div></div>').html('UIkit.modal Error: Unsupported data type: ' + typeof content);
+                content = UI.$('<div></div>').html('UIkit2.modal Error: Unsupported data type: ' + typeof content);
         }
 
         content.appendTo(modal.element.find('.uk-modal-dialog'));
@@ -381,4 +384,4 @@
         return modal;
     }
 
-})(UIkit);
+})(UIkit2);
