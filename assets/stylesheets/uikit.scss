@@ -1,4 +1,11 @@
-$icon-font-path: "../assets";
+@font-face {
+    font-family: 'FontAwesome';
+    src: asset-url("fontawesome-webfont.woff2") format('woff2'),
+         asset-url("fontawesome-webfont.woff") format("woff"),
+         asset-url("fontawesome-webfont.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
 
 // LESS related
 @import "core/variables.scss";
